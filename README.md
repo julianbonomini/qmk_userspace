@@ -43,27 +43,51 @@ Key functions:
 - `display_module_housekeeping_task_kb()` - Main loop for both displays
 - Secondary display shows Game of Life animation
 
-### 2. Compile Firmware
+### 2. Commit & Push (Automated Build)
+```bash
+git add .
+git commit -m "Update display behavior"
+git push
+```
+
+**GitHub Actions will automatically:**
+- Build all firmware targets from `qmk.json`
+- Create compiled `.uf2` files
+- Publish to **Releases** tab
+
+### 3. Download Firmware
+1. Go to your repo's **Actions** tab
+2. Wait for build to complete (green checkmark)
+3. Go to **Releases** tab
+4. Download the latest firmware (e.g., `splitkb_halcyon_lily58_rev2_buenomini_display.uf2`)
+
+### 4. Flash Keyboard
+1. Put keyboard in bootloader mode (double-tap reset button)
+2. Keyboard appears as USB drive
+3. Drag & drop the `.uf2` file onto the drive
+4. Keyboard auto-reboots with new firmware
+
+### 5. Restore Keymaps (Optional)
+If your VIAL keymaps were reset:
+1. Go to [vial.rocks](https://vial.rocks)
+2. Import your saved JSON layout
+3. Or reconfigure from scratch
+
+---
+
+### Local Compilation (Alternative)
+If you prefer to build locally instead of using GitHub Actions:
+
 ```bash
 # Compile specific target
 qmk compile -kb splitkb/halcyon/lily58/rev2 -km buenomini -e HLC_TFT_DISPLAY=1
 
 # Or compile all userspace targets
 qmk userspace-compile
-```
 
-### 3. Flash Keyboard
-```bash
-# Put keyboard in bootloader mode (double-tap reset button)
-# Then flash
+# Flash directly
 qmk flash -kb splitkb/halcyon/lily58/rev2 -km buenomini -e HLC_TFT_DISPLAY=1
 ```
-
-### 4. Restore Keymaps (Optional)
-If your VIAL keymaps were reset:
-1. Go to [vial.rocks](https://vial.rocks)
-2. Import your saved JSON layout
-3. Or reconfigure from scratch
 
 ## Build Targets
 
