@@ -298,7 +298,7 @@ bool display_module_housekeeping_task_kb(bool second_display) {
 
         if(!second_display_set) {
             // Draw full-screen image (135x240, full color)
-            painter_image_handle_t img = qp_load_image_mem(gfx_scene_test);
+            painter_image_handle_t img = qp_load_image_mem(gfx_scene_test_resized);
             qp_drawimage(lcd_surface, 0, 0, img);  // Full screen at (0, 0), no recolor
             qp_close_image(img);
 
