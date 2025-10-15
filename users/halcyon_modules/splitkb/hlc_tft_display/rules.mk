@@ -3,8 +3,7 @@ POST_CONFIG_H += $(USER_PATH)/splitkb/hlc_tft_display/config.h
 
 # Fonts
 SRC += $(USER_PATH)/splitkb/hlc_tft_display/graphics/fonts/Retron2000-27.qff.c \
-       $(USER_PATH)/splitkb/hlc_tft_display/graphics/fonts/Retron2000-underline-27.qff.c \
-       $(USER_PATH)/splitkb/hlc_tft_display/graphics/fonts/unicode_font.qff.c
+       $(USER_PATH)/splitkb/hlc_tft_display/graphics/fonts/Retron2000-underline-27.qff.c
 
 # Numbers in image format
 SRC += $(USER_PATH)/splitkb/hlc_tft_display/graphics/numbers/0.qgf.c \
@@ -18,3 +17,9 @@ SRC += $(USER_PATH)/splitkb/hlc_tft_display/graphics/numbers/0.qgf.c \
 	   $(USER_PATH)/splitkb/hlc_tft_display/graphics/numbers/8.qgf.c \
 	   $(USER_PATH)/splitkb/hlc_tft_display/graphics/numbers/9.qgf.c \
 	   $(USER_PATH)/splitkb/hlc_tft_display/graphics/numbers/undef.qgf.c
+
+# Emoticons
+SRC += $(USER_PATH)/splitkb/hlc_tft_display/graphics/emoticon_happy.qgf.c \
+       $(USER_PATH)/splitkb/hlc_tft_display/graphics/emoticon_flip.qgf.c \
+       $(USER_PATH)/splitkb/hlc_tft_display/graphics/emoticon_cool.qgf.c \
+       $(USER_PATH)/splitkb/hlc_tft_display/graphics/emoticon_unflip.qgf.c
