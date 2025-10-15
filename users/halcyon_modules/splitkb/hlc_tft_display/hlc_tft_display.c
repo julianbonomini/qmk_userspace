@@ -9,6 +9,7 @@
 // Fonts mono2
 #include "graphics/fonts/Retron2000-27.qff.h"
 #include "graphics/fonts/Retron2000-underline-27.qff.h"
+#include "graphics/fonts/unicode_font.qff.h"
 
 // Numbers mono2
 #include "graphics/numbers/0.qgf.h"
@@ -297,13 +298,11 @@ bool display_module_housekeeping_task_kb(bool second_display) {
             // Clear screen
             qp_rect(lcd_surface, 0, 0, LCD_WIDTH - 1, LCD_HEIGHT - 1, HSV_BLACK, true);
 
-            // Load font if not already loaded
-            if (!Retron27) {
-                Retron27 = qp_load_font_mem(font_Retron2000_27);
-            }
+            // Load Unicode font
+            painter_font_handle_t unicode_font = qp_load_font_mem(font_unicode_font);
 
-            // Try to draw Unicode text centered
-            qp_drawtext_recolor(lcd_surface, 10, LCD_HEIGHT / 2 - 20, Retron27, "(づ ◕‿◕ )づ", HSV_WHITE, HSV_BLACK);
+            // Draw Unicode text centered
+            qp_drawtext_recolor(lcd_surface, 10, LCD_HEIGHT / 2 - 20, unicode_font, "(づ ◕‿◕ )づ", HSV_WHITE, HSV_BLACK);
 
             second_display_set = true;
         }
