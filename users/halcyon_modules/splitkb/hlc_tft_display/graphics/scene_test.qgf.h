@@ -11,4 +11,4 @@
 #include <qp.h>
 
 extern const uint32_t gfx_scene_test_resized_length;
-extern const uint8_t  gfx_scene_test_resized[25198];
+extern const uint8_t  gfx_scene_test_resized[64848];
