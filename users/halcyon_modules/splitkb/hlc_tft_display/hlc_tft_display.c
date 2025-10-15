@@ -11,10 +11,7 @@
 #include "graphics/fonts/Retron2000-underline-27.qff.h"
 
 // Emoticons
-#include "graphics/emoticon_happy.qgf.h"
-#include "graphics/emoticon_flip.qgf.h"
-#include "graphics/emoticon_cool.qgf.h"
-#include "graphics/emoticon_unflip.qgf.h"
+#include "graphics/scene_test.qgf.h"
 
 // Numbers mono2
 #include "graphics/numbers/0.qgf.h"
@@ -300,13 +297,10 @@ bool display_module_housekeeping_task_kb(bool second_display) {
         static bool second_display_set = false;
 
         if(!second_display_set) {
-            // Clear screen
-            qp_rect(lcd_surface, 0, 0, LCD_WIDTH - 1, LCD_HEIGHT - 1, HSV_BLACK, true);
-
-            // Draw happy emoticon (づ ◕‿◕ )づ
-            painter_image_handle_t emoticon = qp_load_image_mem(gfx_emoticon_happy);
-            qp_drawimage_recolor(lcd_surface, 8, 110, emoticon, HSV_WHITE, HSV_BLACK);
-            qp_close_image(emoticon);
+            // Draw full-screen image (135x240, full color)
+            painter_image_handle_t img = qp_load_image_mem(gfx_scene_test);
+            qp_drawimage(lcd_surface, 0, 0, img);  // Full screen at (0, 0), no recolor
+            qp_close_image(img);
 
             second_display_set = true;
         }

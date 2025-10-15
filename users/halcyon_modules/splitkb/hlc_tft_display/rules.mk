@@ -19,7 +19,4 @@ SRC += $(USER_PATH)/splitkb/hlc_tft_display/graphics/numbers/0.qgf.c \
 	   $(USER_PATH)/splitkb/hlc_tft_display/graphics/numbers/undef.qgf.c
 
 # Emoticons
-SRC += $(USER_PATH)/splitkb/hlc_tft_display/graphics/emoticon_happy.qgf.c \
-       $(USER_PATH)/splitkb/hlc_tft_display/graphics/emoticon_flip.qgf.c \
-       $(USER_PATH)/splitkb/hlc_tft_display/graphics/emoticon_cool.qgf.c \
-       $(USER_PATH)/splitkb/hlc_tft_display/graphics/emoticon_unflip.qgf.c
+SRC += $(USER_PATH)/splitkb/hlc_tft_display/graphics/scene_test.qgf.c

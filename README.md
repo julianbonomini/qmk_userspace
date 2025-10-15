@@ -102,12 +102,75 @@ List all targets: `qmk userspace-list`
 
 **Primary display (master half):**
 - Large layer number indicator (0-7)
-- Lock status: Caps, Num, Scroll Lock
+- Modifier indicators: Ctrl, Alt, Cmd (highlights when pressed)
 
 **Secondary display:**
-- Conway's Game of Life animation
-- Color changes based on active layer
-- Adds cell clusters on keypresses
+- Custom graphics (emoticons, logos, icons)
+- Can be changed dynamically based on keyboard events
+
+## Adding Custom Images to Display
+
+Add any image (logo, icon, emoticon) to your keyboard display:
+
+### 1. Prepare Your Image
+- **Format:** PNG
+- **Size:** 135x240px max (display size), smaller recommended
+- **Colors:** High contrast works best - black background, white foreground
+- **Tools:** Any image editor (Photoshop, GIMP, Figma, etc.)
+
+For text/emoticons with Unicode, use Python + PIL:
+```bash
+python3 << 'EOF'
+from PIL import Image, ImageDraw, ImageFont
+img = Image.new('L', (120, 20), color=0)
+draw = ImageDraw.Draw(img)
+font = ImageFont.truetype('/path/to/font.ttf', 16)
+draw.text((5, 2), "(づ ◕‿◕ )づ", fill=255, font=font)
+img.save('my_image.png')
+EOF
+```
+
+### 2. Convert to QMK Format
+```bash
+qmk painter-convert-graphics -f mono2 -i my_image.png
+# Creates: my_image.qgf.c and my_image.qgf.h
+```
+
+### 3. Move Files to Graphics Folder
+```bash
+mv my_image.qgf.* users/halcyon_modules/splitkb/hlc_tft_display/graphics/
+```
+
+### 4. Add to Build System
+Edit `users/halcyon_modules/splitkb/hlc_tft_display/rules.mk`, add to the end:
+```make
+SRC += $(USER_PATH)/splitkb/hlc_tft_display/graphics/my_image.qgf.c
+```
+
+### 5. Use in Code
+Edit `users/halcyon_modules/splitkb/hlc_tft_display/hlc_tft_display.c`:
+
+**Add include at top (~line 14):**
+```c
+#include "graphics/my_image.qgf.h"
+```
+
+**Display the image (~line 307):**
+```c
+painter_image_handle_t img = qp_load_image_mem(gfx_my_image);
+qp_drawimage_recolor(lcd_surface, x, y, img, HSV_WHITE, HSV_BLACK);
+qp_close_image(img);
+```
+
+### 6. Build & Flash
+```bash
+git add .
+git commit -m "Add custom image"
+git push
+```
+Download from **Releases** tab and flash to keyboard.
+
+**Tip:** See `graphics/numbers/` for examples - one `.qgf.c` + `.qgf.h` per image.
 
 ## Setup (First Time)
 
