@@ -436,9 +436,16 @@ bool display_module_housekeeping_task_kb(bool second_display) {
     if(!display_module_housekeeping_task_user(second_display)) { return false; }
 
     if(second_display) {
-        // Update emotion state and render
-        update_emotion_state();
-        render_emotion();
+        static bool second_display_set = false;
+
+        if(!second_display_set) {
+            // Draw full-screen image (135x240, full color)
+            painter_image_handle_t img = qp_load_image_mem(gfx_emotion_base_resized);
+            qp_drawimage(lcd_surface, 0, 0, img);
+            qp_close_image(img);
+
+            second_display_set = true;
+        }
     }
 
     // Update display information (layers, numlock, etc.)
