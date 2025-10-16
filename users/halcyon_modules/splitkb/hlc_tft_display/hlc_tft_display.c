@@ -45,30 +45,6 @@ led_t last_led_usb_state = {0};
 layer_state_t last_layer_state = {0};
 uint8_t last_mods = 0;
 
-// Emotion state tracking
-typedef enum {
-    EMOTION_BASE,
-    EMOTION_SLEEP,
-    EMOTION_TYPING,
-    EMOTION_TYPING_FAST,
-    EMOTION_BACKSPACE,
-    EMOTION_MANY_BACKSPACES,
-    EMOTION_VOLUME_CHANGE
-} emotion_state_t;
-
-static emotion_state_t current_emotion = EMOTION_BASE;
-static uint32_t last_activity_time = 0;
-static uint32_t last_keypress_time = 0;
-static uint16_t keypress_count = 0;
-static uint16_t backspace_count = 0;
-static uint32_t emotion_display_time = 0;
-
-#define SLEEP_TIMEOUT 30000      // 30 seconds idle = sleep
-#define TYPING_FAST_WPM 40       // WPM threshold for fast typing
-#define MANY_BACKSPACE_THRESHOLD 3  // 3+ backspaces = rage
-#define EMOTION_DISPLAY_DURATION 2000  // Show special emotions for 2 seconds
-#define TYPING_TIMEOUT 500       // 500ms between keypresses to count as typing
-
 #define GRID_WIDTH 27
 #define GRID_HEIGHT 48
 #define CELL_SIZE 4  // Cell size excluding outline
@@ -275,113 +251,6 @@ void update_display(void) {
     }
 }
 
-void update_emotion_state(void) {
-    uint32_t now = timer_read32();
-    uint32_t time_since_activity = now - last_activity_time;
-
-    // Check if we should return to base state after special emotion duration
-    if (current_emotion != EMOTION_BASE && current_emotion != EMOTION_SLEEP && current_emotion != EMOTION_TYPING && current_emotion != EMOTION_TYPING_FAST) {
-        if (now - emotion_display_time > EMOTION_DISPLAY_DURATION) {
-            current_emotion = EMOTION_BASE;
-            backspace_count = 0;
-        }
-    }
-
-    // Sleep state (idle for 30+ seconds)
-    if (time_since_activity > SLEEP_TIMEOUT) {
-        current_emotion = EMOTION_SLEEP;
-        return;
-    }
-
-    // If actively typing, check typing speed
-    if (now - last_keypress_time < TYPING_TIMEOUT && keypress_count > 0) {
-        // Estimate WPM based on keypress frequency (rough calculation)
-        // If more than 6 keys in the last 500ms, consider it fast typing
-        if (keypress_count > 6) {
-            current_emotion = EMOTION_TYPING_FAST;
-        } else {
-            current_emotion = EMOTION_TYPING;
-        }
-        return;
-    }
-
-    // Reset typing count if not actively typing
-    if (now - last_keypress_time > TYPING_TIMEOUT) {
-        keypress_count = 0;
-    }
-}
-
-void render_emotion(void) {
-    static emotion_state_t last_rendered_emotion = EMOTION_BASE;
-
-    if (current_emotion == last_rendered_emotion) {
-        return;  // No change, don't redraw
-    }
-
-    painter_image_handle_t emotion_img;
-
-    switch (current_emotion) {
-        case EMOTION_BASE:
-            emotion_img = qp_load_image_mem(gfx_emotion_base_resized);
-            break;
-        case EMOTION_SLEEP:
-            emotion_img = qp_load_image_mem(gfx_emotion_sleep_resized);
-            break;
-        case EMOTION_TYPING:
-            emotion_img = qp_load_image_mem(gfx_emotion_typing_resized);
-            break;
-        case EMOTION_TYPING_FAST:
-            emotion_img = qp_load_image_mem(gfx_emotion_typing_fast_resized);
-            break;
-        case EMOTION_BACKSPACE:
-            emotion_img = qp_load_image_mem(gfx_emotion_backspace_resized);
-            break;
-        case EMOTION_MANY_BACKSPACES:
-            emotion_img = qp_load_image_mem(gfx_emotion_many_backspaces_resized);
-            break;
-        case EMOTION_VOLUME_CHANGE:
-            emotion_img = qp_load_image_mem(gfx_emotion_volume_change_resized);
-            break;
-        default:
-            emotion_img = qp_load_image_mem(gfx_emotion_base_resized);
-    }
-
-    qp_drawimage(lcd_surface, 0, 0, emotion_img);
-    qp_close_image(emotion_img);
-
-    last_rendered_emotion = current_emotion;
-}
-
-// Track keypresses for emotion state
-void emotion_track_keypress(uint16_t keycode) {
-    uint32_t now = timer_read32();
-    last_activity_time = now;
-
-    // Track backspace
-    if (keycode == KC_BSPC) {
-        backspace_count++;
-
-        if (backspace_count >= MANY_BACKSPACE_THRESHOLD) {
-            current_emotion = EMOTION_MANY_BACKSPACES;
-        } else {
-            current_emotion = EMOTION_BACKSPACE;
-        }
-        emotion_display_time = now;
-    } else {
-        // Regular key press
-        backspace_count = 0;
-        keypress_count++;
-        last_keypress_time = now;
-    }
-}
-
-// Track volume changes
-void emotion_track_volume_change(void) {
-    current_emotion = EMOTION_VOLUME_CHANGE;
-    emotion_display_time = timer_read32();
-    last_activity_time = timer_read32();
-}
-
 // Called from halcyon.c
 void module_suspend_power_down_kb(void) {
     qp_power(lcd, false);
@@ -414,10 +283,6 @@ bool module_post_init_kb(void) {
     qp_rect(lcd_surface, 0, 0, LCD_WIDTH - 1, LCD_HEIGHT - 1, HSV_BLACK, true);
     qp_surface_draw(lcd_surface, lcd, 0, 0, 0);
     qp_flush(lcd);
-
-    // Initialize emotion tracking
-    last_activity_time = timer_read32();
-    current_emotion = EMOTION_BASE;
 
     if(!module_post_init_user()) { return false; }
 

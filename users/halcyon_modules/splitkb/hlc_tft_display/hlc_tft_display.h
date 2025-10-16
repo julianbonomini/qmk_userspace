@@ -37,7 +37,3 @@ uint8_t get_random_color_index(void);
 void update_display(void);
 void backlight_wakeup(void);
 void backlight_suspend(void);
-
-// Emotion tracking functions
-void emotion_track_keypress(uint16_t keycode);
-void emotion_track_volume_change(void);
