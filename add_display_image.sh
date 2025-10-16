@@ -36,6 +36,11 @@ from PIL import Image
 # Open and convert to RGB
 img = Image.open('$INPUT_IMAGE').convert('RGB')
 
+# Rotate if landscape (width > height)
+if img.width > img.height:
+    img = img.rotate(90, expand=True)
+    print(f"🔄 Rotated landscape image to portrait")
+
 # Calculate resize to fit within 135x240 maintaining aspect ratio
 img.thumbnail(($DISPLAY_WIDTH, $DISPLAY_HEIGHT), Image.Resampling.LANCZOS)
 

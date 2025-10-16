@@ -12,6 +12,13 @@
 
 // Emoticons
 #include "graphics/scene_test.qgf.h"
+#include "graphics/emotion_base.qgf.h"
+#include "graphics/emotion_sleep.qgf.h"
+#include "graphics/emotion_typing.qgf.h"
+#include "graphics/emotion_typing_fast.qgf.h"
+#include "graphics/emotion_backspace.qgf.h"
+#include "graphics/emotion_many_backspaces.qgf.h"
+#include "graphics/emotion_volume_change.qgf.h"
 
 // Numbers mono2
 #include "graphics/numbers/0.qgf.h"
@@ -44,6 +51,30 @@ painter_device_t lcd_surface;
 led_t last_led_usb_state = {0};
 layer_state_t last_layer_state = {0};
 uint8_t last_mods = 0;
+
+// Emotion state tracking
+typedef enum {
+    EMOTION_BASE,
+    EMOTION_SLEEP,
+    EMOTION_TYPING,
+    EMOTION_TYPING_FAST,
+    EMOTION_BACKSPACE,
+    EMOTION_MANY_BACKSPACES,
+    EMOTION_VOLUME_CHANGE
+} emotion_state_t;
+
+static emotion_state_t current_emotion = EMOTION_BASE;
+static uint32_t last_activity_time = 0;
+static uint32_t last_keypress_time = 0;
+static uint16_t keypress_count = 0;
+static uint16_t backspace_count = 0;
+static uint32_t emotion_display_time = 0;
+
+#define SLEEP_TIMEOUT 30000      // 30 seconds idle = sleep
+#define TYPING_FAST_WPM 40       // WPM threshold for fast typing
+#define MANY_BACKSPACE_THRESHOLD 3  // 3+ backspaces = rage
+#define EMOTION_DISPLAY_DURATION 2000  // Show special emotions for 2 seconds
+#define TYPING_TIMEOUT 500       // 500ms between keypresses to count as typing
 
 #define GRID_WIDTH 27
 #define GRID_HEIGHT 48
@@ -251,6 +282,112 @@ void update_display(void) {
     }
 }
 
+void update_emotion_state(void) {
+    uint32_t now = timer_read32();
+    uint32_t time_since_activity = now - last_activity_time;
+
+    // Check if we should return to base state after special emotion duration
+    if (current_emotion != EMOTION_BASE && current_emotion != EMOTION_SLEEP && current_emotion != EMOTION_TYPING && current_emotion != EMOTION_TYPING_FAST) {
+        if (now - emotion_display_time > EMOTION_DISPLAY_DURATION) {
+            current_emotion = EMOTION_BASE;
+            backspace_count = 0;
+        }
+    }
+
+    // Sleep state (idle for 30+ seconds)
+    if (time_since_activity > SLEEP_TIMEOUT) {
+        current_emotion = EMOTION_SLEEP;
+        return;
+    }
+
+    // If actively typing, check WPM
+    if (now - last_keypress_time < TYPING_TIMEOUT && keypress_count > 0) {
+        uint8_t wpm = get_current_wpm();
+        if (wpm > TYPING_FAST_WPM) {
+            current_emotion = EMOTION_TYPING_FAST;
+        } else {
+            current_emotion = EMOTION_TYPING;
+        }
+        return;
+    }
+
+    // Reset typing count if not actively typing
+    if (now - last_keypress_time > TYPING_TIMEOUT) {
+        keypress_count = 0;
+    }
+}
+
+void render_emotion(void) {
+    static emotion_state_t last_rendered_emotion = EMOTION_BASE;
+
+    if (current_emotion == last_rendered_emotion) {
+        return;  // No change, don't redraw
+    }
+
+    painter_image_handle_t emotion_img;
+
+    switch (current_emotion) {
+        case EMOTION_BASE:
+            emotion_img = qp_load_image_mem(gfx_emotion_base);
+            break;
+        case EMOTION_SLEEP:
+            emotion_img = qp_load_image_mem(gfx_emotion_sleep);
+            break;
+        case EMOTION_TYPING:
+            emotion_img = qp_load_image_mem(gfx_emotion_typing);
+            break;
+        case EMOTION_TYPING_FAST:
+            emotion_img = qp_load_image_mem(gfx_emotion_typing_fast);
+            break;
+        case EMOTION_BACKSPACE:
+            emotion_img = qp_load_image_mem(gfx_emotion_backspace);
+            break;
+        case EMOTION_MANY_BACKSPACES:
+            emotion_img = qp_load_image_mem(gfx_emotion_many_backspaces);
+            break;
+        case EMOTION_VOLUME_CHANGE:
+            emotion_img = qp_load_image_mem(gfx_emotion_volume_change);
+            break;
+        default:
+            emotion_img = qp_load_image_mem(gfx_emotion_base);
+    }
+
+    qp_drawimage(lcd_surface, 0, 0, emotion_img);
+    qp_close_image(emotion_img);
+
+    last_rendered_emotion = current_emotion;
+}
+
+// Track keypresses for emotion state
+void emotion_track_keypress(uint16_t keycode) {
+    uint32_t now = timer_read32();
+    last_activity_time = now;
+
+    // Track backspace
+    if (keycode == KC_BSPC) {
+        backspace_count++;
+
+        if (backspace_count >= MANY_BACKSPACE_THRESHOLD) {
+            current_emotion = EMOTION_MANY_BACKSPACES;
+        } else {
+            current_emotion = EMOTION_BACKSPACE;
+        }
+        emotion_display_time = now;
+    } else {
+        // Regular key press
+        backspace_count = 0;
+        keypress_count++;
+        last_keypress_time = now;
+    }
+}
+
+// Track volume changes
+void emotion_track_volume_change(void) {
+    current_emotion = EMOTION_VOLUME_CHANGE;
+    emotion_display_time = timer_read32();
+    last_activity_time = timer_read32();
+}
+
 // Called from halcyon.c
 void module_suspend_power_down_kb(void) {
     qp_power(lcd, false);
@@ -294,16 +431,9 @@ bool display_module_housekeeping_task_kb(bool second_display) {
     if(!display_module_housekeeping_task_user(second_display)) { return false; }
 
     if(second_display) {
-        static bool second_display_set = false;
-
-        if(!second_display_set) {
-            // Draw full-screen image (135x240, full color)
-            painter_image_handle_t img = qp_load_image_mem(gfx_scene_test_resized);
-            qp_drawimage(lcd_surface, 0, 0, img);  // Full screen at (0, 0), no recolor
-            qp_close_image(img);
-
-            second_display_set = true;
-        }
+        // Update emotion state and render
+        update_emotion_state();
+        render_emotion();
     }
 
     // Update display information (layers, numlock, etc.)

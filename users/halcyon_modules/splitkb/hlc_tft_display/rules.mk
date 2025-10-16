@@ -20,3 +20,10 @@ SRC += $(USER_PATH)/splitkb/hlc_tft_display/graphics/numbers/0.qgf.c \
 
 # Emoticons
 SRC += $(USER_PATH)/splitkb/hlc_tft_display/graphics/scene_test.qgf.c
+SRC += $(USER_PATH)/splitkb/hlc_tft_display/graphics/emotion_backspace.qgf.c
+SRC += $(USER_PATH)/splitkb/hlc_tft_display/graphics/emotion_base.qgf.c
+SRC += $(USER_PATH)/splitkb/hlc_tft_display/graphics/emotion_many_backspaces.qgf.c
+SRC += $(USER_PATH)/splitkb/hlc_tft_display/graphics/emotion_sleep.qgf.c
+SRC += $(USER_PATH)/splitkb/hlc_tft_display/graphics/emotion_typing.qgf.c
+SRC += $(USER_PATH)/splitkb/hlc_tft_display/graphics/emotion_typing_fast.qgf.c
+SRC += $(USER_PATH)/splitkb/hlc_tft_display/graphics/emotion_volume_change.qgf.c
