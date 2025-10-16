@@ -11,4 +11,4 @@
 #include <qp.h>
 
 extern const uint32_t gfx_emotion_volume_change_resized_length;
-extern const uint8_t  gfx_emotion_volume_change_resized[33242];
+extern const uint8_t  gfx_emotion_volume_change_resized[33241];

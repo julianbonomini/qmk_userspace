@@ -11,4 +11,4 @@
 #include <qp.h>
 
 extern const uint32_t gfx_emotion_base_resized_length;
-extern const uint8_t  gfx_emotion_base_resized[41056];
+extern const uint8_t  gfx_emotion_base_resized[41024];

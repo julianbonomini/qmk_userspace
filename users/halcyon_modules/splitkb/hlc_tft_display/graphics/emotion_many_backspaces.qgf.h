@@ -11,4 +11,4 @@
 #include <qp.h>
 
 extern const uint32_t gfx_emotion_many_backspaces_resized_length;
-extern const uint8_t  gfx_emotion_many_backspaces_resized[32204];
+extern const uint8_t  gfx_emotion_many_backspaces_resized[32244];

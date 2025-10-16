@@ -422,6 +422,10 @@ bool module_post_init_kb(void) {
     qp_surface_draw(lcd_surface, lcd, 0, 0, 0);
     qp_flush(lcd);
 
+    // Initialize emotion tracking
+    last_activity_time = timer_read32();
+    current_emotion = EMOTION_BASE;
+
     if(!module_post_init_user()) { return false; }
 
     return true;

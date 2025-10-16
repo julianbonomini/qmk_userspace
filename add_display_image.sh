@@ -38,8 +38,8 @@ img = Image.open('$INPUT_IMAGE').convert('RGB')
 
 # Rotate if landscape (width > height)
 if img.width > img.height:
-    img = img.rotate(90, expand=True)
-    print(f"🔄 Rotated landscape image to portrait")
+    img = img.rotate(270, expand=True)
+    print(f"🔄 Rotated landscape image to portrait (270°)")
 
 # Calculate resize to fit within 135x240 maintaining aspect ratio
 img.thumbnail(($DISPLAY_WIDTH, $DISPLAY_HEIGHT), Image.Resampling.LANCZOS)

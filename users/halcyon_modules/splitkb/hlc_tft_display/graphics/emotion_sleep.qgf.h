@@ -11,4 +11,4 @@
 #include <qp.h>
 
 extern const uint32_t gfx_emotion_sleep_resized_length;
-extern const uint8_t  gfx_emotion_sleep_resized[42885];
+extern const uint8_t  gfx_emotion_sleep_resized[43007];

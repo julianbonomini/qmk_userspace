@@ -11,4 +11,4 @@
 #include <qp.h>
 
 extern const uint32_t gfx_emotion_typing_fast_resized_length;
-extern const uint8_t  gfx_emotion_typing_fast_resized[44974];
+extern const uint8_t  gfx_emotion_typing_fast_resized[44870];
