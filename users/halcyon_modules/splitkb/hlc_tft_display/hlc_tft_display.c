@@ -300,10 +300,11 @@ void update_emotion_state(void) {
         return;
     }
 
-    // If actively typing, check WPM
+    // If actively typing, check typing speed
     if (now - last_keypress_time < TYPING_TIMEOUT && keypress_count > 0) {
-        uint8_t wpm = get_current_wpm();
-        if (wpm > TYPING_FAST_WPM) {
+        // Estimate WPM based on keypress frequency (rough calculation)
+        // If more than 6 keys in the last 500ms, consider it fast typing
+        if (keypress_count > 6) {
             current_emotion = EMOTION_TYPING_FAST;
         } else {
             current_emotion = EMOTION_TYPING;
@@ -328,28 +329,28 @@ void render_emotion(void) {
 
     switch (current_emotion) {
         case EMOTION_BASE:
-            emotion_img = qp_load_image_mem(gfx_emotion_base);
+            emotion_img = qp_load_image_mem(gfx_emotion_base_resized);
             break;
         case EMOTION_SLEEP:
-            emotion_img = qp_load_image_mem(gfx_emotion_sleep);
+            emotion_img = qp_load_image_mem(gfx_emotion_sleep_resized);
             break;
         case EMOTION_TYPING:
-            emotion_img = qp_load_image_mem(gfx_emotion_typing);
+            emotion_img = qp_load_image_mem(gfx_emotion_typing_resized);
             break;
         case EMOTION_TYPING_FAST:
-            emotion_img = qp_load_image_mem(gfx_emotion_typing_fast);
+            emotion_img = qp_load_image_mem(gfx_emotion_typing_fast_resized);
             break;
         case EMOTION_BACKSPACE:
-            emotion_img = qp_load_image_mem(gfx_emotion_backspace);
+            emotion_img = qp_load_image_mem(gfx_emotion_backspace_resized);
             break;
         case EMOTION_MANY_BACKSPACES:
-            emotion_img = qp_load_image_mem(gfx_emotion_many_backspaces);
+            emotion_img = qp_load_image_mem(gfx_emotion_many_backspaces_resized);
             break;
         case EMOTION_VOLUME_CHANGE:
-            emotion_img = qp_load_image_mem(gfx_emotion_volume_change);
+            emotion_img = qp_load_image_mem(gfx_emotion_volume_change_resized);
             break;
         default:
-            emotion_img = qp_load_image_mem(gfx_emotion_base);
+            emotion_img = qp_load_image_mem(gfx_emotion_base_resized);
     }
 
     qp_drawimage(lcd_surface, 0, 0, emotion_img);
